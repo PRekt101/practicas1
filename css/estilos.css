@@ -1,0 +1,133 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f6f6;
+}
+
+/* --- HEADER --- */
+.topbar {
+  background: #d40000;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 30px;
+}
+.topbar h1 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.buscador {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  margin: 0 40px;
+}
+.buscador input {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 4px 0 0 4px;
+}
+.buscador button {
+  background: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+.iconos i {
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.categorias {
+  background: white;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  gap: 25px;
+}
+.categorias a {
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+}
+
+/* --- LAYOUT --- */
+.contenedor {
+  display: flex;
+  padding: 20px 40px;
+}
+
+.filtros {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  width: 220px;
+  height: fit-content;
+}
+.filtros label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+.filtros select, .filtros input {
+  width: 100%;
+  padding: 5px;
+  margin-top: 5px;
+}
+.filtros .botones {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+.filtros button, .filtros .limpiar {
+  padding: 6px 10px;
+  border: none;
+  background: #d40000;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.filtros .limpiar {
+  background: gray;
+}
+
+/* --- PRODUCTOS --- */
+main {
+  flex-grow: 1;
+  margin-left: 30px;
+}
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+.producto {
+  background: #fff9e6;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  text-align: left;
+}
+.producto .imagen {
+  background: #f7e99a;
+  height: 120px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.precio {
+  font-weight: bold;
+}
+
+/* --- FOOTER --- */
+footer {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  margin-top: 30px;
+}
