@@ -52,14 +52,16 @@ session_start(); // solo inicia sesión, no redirige ni destruye
               }
             ?>
 
-            <div class="producto">
+            <!-- Tarjeta del producto con enlace al detalle -->
+            <a href="html/detalle_producto.php?id=<?= isset($p['idProducto']) ? urlencode((string)$p['idProducto']) : '' ?>" class="producto">
               <div class="imagen">
                 <img src="<?= htmlspecialchars($rutaImagen) ?>" alt="<?= htmlspecialchars($p['nombre']) ?>">
               </div>
               <h3><?= htmlspecialchars($p['nombre']) ?></h3>
-              <p><?= htmlspecialchars($p['marcaNombre']) ?> · Talla <?= htmlspecialchars($p['talla']) ?> · Color <?= htmlspecialchars($p['color']) ?></p>
+              <p><?= htmlspecialchars($p['marcaNombre']) ?> · Color <?= htmlspecialchars($p['color']) ?></p>
               <p class="precio">€ <?= number_format($p['precio'], 2) ?></p>
-            </div>
+            </a>
+
           <?php endforeach; ?>
         <?php endif; ?>
       </div>
