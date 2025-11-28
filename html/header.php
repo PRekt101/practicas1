@@ -11,15 +11,19 @@ if (session_status() === PHP_SESSION_NONE) {
       <input type="text" name="buscar" placeholder="Buscar productos.." value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>">
       <button type="submit"><i class="fa fa-search"></i></button>
     </form>
+    
     <div class="iconos">
-      <i class="fa fa-shopping-cart"></i>
+      <a href="#" title="Ver carrito"><i class="fa fa-shopping-cart"></i></a>
 
       <?php if (isset($_SESSION['usuario'])): ?>
-        <!-- Si está logueado, el icono hace logout -->
-        <a href="login/logout.php"><i class="fa fa-user" title="Cerrar sesión"></i></a>
+        <span class="user-display">¡Hola, **<?= htmlspecialchars($_SESSION['usuario']) ?>**!</span>
+        <a href="login/logout.php" class="user-icon logged-in" title="Cerrar sesión">
+          <i class="fa fa-user"></i>
+        </a>
       <?php else: ?>
-        <!-- Si no está logueado, el icono lleva al login -->
-        <a href="login/login.php"><i class="fa fa-user" title="Iniciar sesión"></i></a>
+        <a href="login/login.php" class="user-icon logged-out" title="Iniciar sesión">
+          <i class="fa fa-user"></i>
+        </a>
       <?php endif; ?>
     </div>
   </div>

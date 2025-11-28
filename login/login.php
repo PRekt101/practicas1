@@ -35,70 +35,130 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Tienda</title>
-    <link rel="stylesheet" href="../css/estilos.css"> <!-- 🔹 Ruta corregida -->
-    <style>
+    <title>Login - JP Calzados</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> <style>
+        /* --- ESTILOS DE FONDO Y CONTENEDOR --- */
         body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
+            font-family: 'Arial', sans-serif;
+            /* Fondo con degradado sutil */
+            background: linear-gradient(135deg, #f2f2f2 0%, #e0e0e0 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
+            transition: background 0.5s;
         }
 
         .login-container {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
-            width: 300px;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Sombra más profunda */
+            width: 350px;
+            max-width: 90%;
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px); /* Pequeña elevación al pasar el ratón */
+        }
+
+        /* --- TÍTULO Y LOGO --- */
+        .login-container h2 {
+            margin-top: 0;
+            color: #d40000; /* Usamos el color principal de la tienda */
+            font-size: 2em;
+            margin-bottom: 25px;
+        }
+
+        /* --- CAMPOS DE FORMULARIO --- */
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
         }
 
         input {
-            width: 90%;
-            padding: 8px;
-            margin: 8px 0;
+            width: 100%; /* Ocupa el 100% del contenedor */
+            padding: 12px 10px;
+            margin: 0; /* Quitamos el margen vertical extra */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
+        input:focus {
+            border-color: #d40000; /* Resalta con el color de la tienda al enfocar */
+            box-shadow: 0 0 5px rgba(212, 0, 0, 0.3);
+            outline: none;
+        }
+
+        /* --- BOTÓN --- */
         button {
-            background: #007bff;
+            background: #d40000; /* Botón rojo de la tienda */
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
+            margin-top: 30px;
             width: 100%;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background 0.3s, transform 0.1s;
         }
 
         button:hover {
-            background: #0056b3;
+            background: #a30000; /* Tono más oscuro al pasar el ratón */
+            transform: translateY(-1px);
         }
 
+        /* --- MENSAJE DE ERROR --- */
         .error {
-            color: red;
+            background-color: #fcebeb;
+            color: #cc0033;
+            border: 1px solid #cc0033;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
             font-size: 14px;
+        }
+
+        /* Icono opcional sobre el título */
+        .login-icon {
+            font-size: 2.5em;
+            color: #d40000;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>Iniciar sesión</h2>
+        <i class="fa fa-user-circle login-icon"></i>
+        <h2>Iniciar Sesión en JP Calzados</h2>
 
         <?php if (isset($error)): ?>
             <p class="error"><?php echo $error; ?></p>
         <?php endif; ?>
 
-        <!-- 🔹 Solo un formulario -->
         <form method="POST" action="">
-            <label>Usuario:</label><br>
-            <input type="text" name="usuario" required><br>
+            <label for="usuario">Usuario:</label>
+            <input type="text" id="usuario" name="usuario" required>
 
-            <label>Contraseña:</label><br>
-            <input type="password" name="password" required><br>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
 
-            <button type="submit">Entrar</button>
+            <button type="submit">
+                <i class="fa fa-sign-in-alt"></i> Entrar
+            </button>
         </form>
     </div>
 </body>

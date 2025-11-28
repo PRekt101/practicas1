@@ -131,3 +131,27 @@ footer {
   padding: 15px;
   margin-top: 30px;
 }
+
+/* Aseguramos que los enlaces de iconos hereden el color blanco del topbar */
+.iconos a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Estilo para mostrar el nombre de usuario (solo visible cuando está logueado) */
+.iconos .user-display {
+  color: white;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-right: 5px; /* Espacio antes del icono de usuario */
+}
+
+/* Estilo del icono de usuario cuando está logueado (Cerrar Sesión) */
+.iconos .user-icon.logged-in i {
+  /* Color verde claro para indicar estado activo */
+  color: #a7f3d0;
+  /* Añadimos un pequeño fondo o borde para que destaque aún más */
+  background-color: rgba(0, 0, 0, 0.2); 
+  padding: 5px;
+  border-radius: 50%;
+}
