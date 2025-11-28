@@ -8,26 +8,52 @@ if (isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Si se envía el formulario... (la lógica de login sigue igual)
+$mensaje = "";
+
+// Si se envía el formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $usuario = $_POST['usuario'];
+    $usuario = trim($_POST['usuario']);
     $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
 
-    // Consulta segura con PDO
-    $sql = "SELECT * FROM usuario WHERE nombre = :usuario AND contraseña = :password";
-    $stmt = $conexion->prepare($sql);
-    $stmt->bindParam(':usuario', $usuario);
-    $stmt->bindParam(':password', $password);
-    $stmt->execute();
-
-    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($resultado) {
-        $_SESSION['usuario'] = $resultado['nombre'];
-        header("Location: ../index.php");
-        exit();
+    // 1. Validación de campos
+    if (empty($usuario) || empty($password) || empty($confirm_password)) {
+        $mensaje = "Todos los campos son obligatorios.";
+    } elseif ($password !== $confirm_password) {
+        $mensaje = "Las contraseñas no coinciden.";
+    } elseif (strlen($password) < 6) {
+        $mensaje = "La contraseña debe tener al menos 6 caracteres.";
     } else {
-        $error = "Usuario o contraseña incorrectos.";
+        try {
+            // 2. Comprobar si el usuario ya existe
+            $sql_check = "SELECT idUsuario FROM usuario WHERE nombre = :usuario";
+            $stmt_check = $conexion->prepare($sql_check);
+            $stmt_check->bindParam(':usuario', $usuario);
+            $stmt_check->execute();
+
+            if ($stmt_check->rowCount() > 0) {
+                $mensaje = "El nombre de usuario ya está registrado.";
+            } else {
+                // 3. Insertar el nuevo usuario, solo con nombre y contraseña.
+                // El rol_id se gestionará en la BBDD o manualmente.
+                $sql_insert = "INSERT INTO usuario (nombre, contraseña) VALUES (:usuario, :password)";
+                $stmt_insert = $conexion->prepare($sql_insert);
+
+                $stmt_insert->bindParam(':usuario', $usuario);
+                $stmt_insert->bindParam(':password', $password); // Nota: Por seguridad real, se recomienda usar password_hash()
+                
+                if ($stmt_insert->execute()) {
+                    // Registro exitoso: iniciar sesión automáticamente y redirigir
+                    $_SESSION['usuario'] = $usuario;
+                    header("Location: ../index.php");
+                    exit();
+                } else {
+                    $mensaje = "Error al crear la cuenta. Intente de nuevo.";
+                }
+            }
+        } catch (PDOException $e) {
+            $mensaje = "Error de base de datos: " . $e->getMessage();
+        }
     }
 }
 ?>
@@ -35,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login - JP Calzados</title>
+    <title>Crear Cuenta - JP Calzados</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -121,8 +147,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transform: translateY(-1px);
         }
 
-        /* --- MENSAJE DE ERROR --- */
-        .error {
+        /* --- MENSAJE DE ERROR/NOTIFICACIÓN --- */
+        .mensaje {
             background-color: #fcebeb;
             color: #cc0033;
             border: 1px solid #cc0033;
@@ -131,50 +157,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 5px;
             font-size: 14px;
         }
-
-        /* Icono opcional sobre el título */
+        
         .login-icon {
             font-size: 2.5em;
             color: #d40000;
             margin-bottom: 10px;
         }
         
-        /* --- NUEVO ESTILO: Enlace a Crear Cuenta --- */
-        .link-registro {
+        .link-volver {
             display: block;
             margin-top: 20px;
-            color: #d40000; /* Color de la marca */
+            color: #d40000;
             text-decoration: none;
             font-size: 0.9em;
             font-weight: bold;
         }
-        .link-registro:hover {
+        .link-volver:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <i class="fa fa-user-circle login-icon"></i>
-        <h2>Iniciar Sesión en JP Calzados</h2>
+        <i class="fa fa-user-plus login-icon"></i>
+        <h2>Crear Cuenta</h2>
 
-        <?php if (isset($error)): ?>
-            <p class="error"><?php echo $error; ?></p>
+        <?php if (!empty($mensaje)): ?>
+            <p class="mensaje"><?php echo $mensaje; ?></p>
         <?php endif; ?>
 
         <form method="POST" action="">
-            <label for="usuario">Usuario:</label>
-            <input type="text" id="usuario" name="usuario" required>
+            <label for="usuario">Nombre de Usuario:</label>
+            <input type="text" id="usuario" name="usuario" required value="<?= htmlspecialchars($_POST['usuario'] ?? '') ?>">
 
             <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" required>
+            
+            <label for="confirm_password">Repetir Contraseña:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
 
             <button type="submit">
-                <i class="fa fa-sign-in-alt"></i> Entrar
+                <i class="fa fa-user-plus"></i> Registrarme
             </button>
         </form>
-
-        <a href="crear_cuenta.php" class="link-registro">¿No tienes cuenta? Regístrate aquí.</a>
+        
+        <a href="login.php" class="link-volver">¿Ya tienes cuenta? Inicia Sesión</a>
     </div>
 </body>
 </html>
