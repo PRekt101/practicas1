@@ -42,31 +42,45 @@ $tipoMensaje = ""; // 'exito' o 'error'
 
 // 2. PROCESAR LA COMPRA
 try {
-    // Iniciamos la transacción (todo o nada)
     $conexion->beginTransaction();
 
-    // A. Calcular el total
+    // ... (Tu código de calcular total e insertar en CARRITO sigue igual) ...
+    // A. Calcular total
     $totalCompra = 0;
     foreach ($_SESSION['carrito'] as $item) {
         $totalCompra += ($item['precio'] * $item['cantidad']);
     }
 
-    // B. Insertar en tabla CARRITO (Cabecera del pedido)
-    // Según tu foto: idCarrito, idUsuario, precioTotal, fechaCreacion
+    // B. Insertar Cabecera
     $sqlCabecera = "INSERT INTO carrito (idUsuario, precioTotal, fechaCreacion) VALUES (?, ?, NOW())";
     $stmt = $conexion->prepare($sqlCabecera);
     $stmt->execute([$idUsuario, $totalCompra]);
-    
-    // Obtener el ID del carrito que acabamos de crear
     $idCarritoGenerado = $conexion->lastInsertId();
 
-    // C. Insertar en tabla DETALLE_CARRITO (Productos individuales)
-    // Según tu foto: idDetalle, idCarrito, idProducto, precioUnitario, cantidad
-    // Nota: He añadido 'talla' al SQL asumiendo que hiciste el Paso 0.
+    // Preparamos consultas
     $sqlDetalle = "INSERT INTO carritodetalle (idCarrito, idProducto, precioUnitario, cantidad, talla) VALUES (?, ?, ?, ?, ?)";
     $stmtDetalle = $conexion->prepare($sqlDetalle);
 
+    $sqlStock = "UPDATE producto SET stock = stock - ? WHERE idProducto = ?";
+    $stmtStock = $conexion->prepare($sqlStock);
+
+    // Consulta para VERIFICAR stock antes de restar
+    $sqlCheck = "SELECT stock, nombre FROM producto WHERE idProducto = ?";
+    $stmtCheck = $conexion->prepare($sqlCheck);
+
+    // E. Recorrer productos
     foreach ($_SESSION['carrito'] as $prod) {
+        
+        // 1. ¡SEGURIDAD! Verificamos si hay stock suficiente en la BBDD
+        $stmtCheck->execute([$prod['id']]);
+        $productoActual = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+        if (!$productoActual || $productoActual['stock'] < $prod['cantidad']) {
+            // Si no hay stock, lanzamos un error y se cancela TODO (gracias al rollback)
+            throw new Exception("Lo sentimos, el producto '" . $prod['nombre'] . "' se acaba de agotar.");
+        }
+
+        // 2. Si hay stock, procedemos a guardar detalle
         $stmtDetalle->execute([
             $idCarritoGenerado,
             $prod['id'],
@@ -74,20 +88,23 @@ try {
             $prod['cantidad'],
             $prod['talla']
         ]);
+
+        // 3. Restar el stock
+        $stmtStock->execute([
+            $prod['cantidad'],
+            $prod['id']
+        ]);
     }
 
-    // D. Confirmar transacción
     $conexion->commit();
-
-    // E. Vaciar el carrito de la sesión y mostrar éxito
     unset($_SESSION['carrito']);
     $mensaje = "¡Gracias por tu compra! Tu pedido #$idCarritoGenerado ha sido registrado.";
     $tipoMensaje = "exito";
 
 } catch (Exception $e) {
-    // Si algo falla, revertimos los cambios en la BD
     $conexion->rollBack();
-    $mensaje = "Hubo un error al procesar tu pedido: " . $e->getMessage();
+    // Mostramos el mensaje de error (ej: "se acaba de agotar")
+    $mensaje = "Error en la compra: " . $e->getMessage();
     $tipoMensaje = "error";
 }
 ?>

@@ -115,21 +115,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['talla'])) {
             Fabricado con materiales resistentes y diseño ergonómico.
         </p>
 
-        <form method="POST" action="" style="margin-top: 30px;">
-          <div style="margin-bottom: 20px;">
-              <label for="talla" style="display: block; margin-bottom: 5px; font-weight: bold;">Selecciona tu talla:</label>
-              <select name="talla" id="talla" required style="padding: 10px; width: 100%; max-width: 200px; border: 1px solid #ccc; border-radius: 4px;">
-                <option value="">Elige una opción...</option>
-                <?php for ($i = 35; $i <= 45; $i++): ?>
-                  <option value="<?= $i ?>">EU <?= $i ?></option>
-                <?php endfor; ?>
-              </select>
-          </div>
+        <?php if ($producto['stock'] > 0): ?>
+      
+          <form method="POST" action="">
+            <label for="talla">Selecciona tu talla:</label>
+            <select name="talla" id="talla" required>
+              <option value="">Elige tu talla</option>
+              <?php for ($i = 35; $i <= 45; $i++): ?>
+                <option value="<?= $i ?>"><?= $i ?></option>
+              <?php endfor; ?>
+            </select>
+            
+            <?php if ($producto['stock'] < 5): ?>
+                <p style="color: orange; font-size: 0.9em;">¡Date prisa! Solo quedan <?= $producto['stock'] ?> unidades.</p>
+            <?php endif; ?>
+
+            <button type="submit">Añadir al carrito</button>
+          </form>
+
+      <?php else: ?>
           
-          <button type="submit" class="btn-comprar" style="background: #333; color: #fff; padding: 12px 24px; border: none; cursor: pointer; font-size: 1rem; border-radius: 4px;">
-            Añadir al carrito <i class="fas fa-shopping-cart"></i>
-          </button>
-        </form>
+          <div class="agotado-container" style="margin-top: 20px;">
+              <p style="color: red; font-weight: bold; font-size: 1.2rem;">PRODUCTO AGOTADO</p>
+              <button disabled style="background-color: #ccc; cursor: not-allowed; border: none; padding: 10px 20px;">No disponible</button>
+          </div>
+
+      <?php endif; ?>
       </div>
     </main>
   </div>
