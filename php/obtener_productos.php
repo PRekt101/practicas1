@@ -5,16 +5,20 @@ require_once 'conexion.php';
 $filtros = [];
 $parametros = [];
 
+// 1. Filtros
 if (!empty($_GET['busqueda'])) {
-    // Usamos LIKE para buscar coincidencias parciales en el nombre
     $filtros[] = "p.nombre LIKE :busqueda";
     $parametros[':busqueda'] = "%" . $_GET['busqueda'] . "%";
 }
 
-// Comprobamos si hay filtros enviados por GET
 if (!empty($_GET['marca'])) {
     $filtros[] = "p.idMarca = :marca";
     $parametros[':marca'] = $_GET['marca'];
+}
+
+if (!empty($_GET['tipo'])) {
+    $filtros[] = "p.tipo = :tipo";
+    $parametros[':tipo'] = $_GET['tipo'];
 }
 
 if (!empty($_GET['talla'])) {
@@ -37,7 +41,7 @@ if (!empty($_GET['max_precio'])) {
     $parametros[':max_precio'] = $_GET['max_precio'];
 }
 
-// Construimos la consulta SQL base
+// 2. Consulta SQL
 $sql = "
     SELECT 
         p.idProducto,
@@ -45,25 +49,22 @@ $sql = "
         p.color,
         p.talla,
         p.precio,
+        p.tipo,
         m.nombre AS marcaNombre
     FROM producto p
     INNER JOIN marca m ON p.idMarca = m.idMarca
 ";
 
-// Añadimos los filtros dinámicos
 if (!empty($filtros)) {
     $sql .= " WHERE " . implode(" AND ", $filtros);
 }
 
-// Orden
 $sql .= " ORDER BY p.nombre ASC";
 
 try {
     $stmt = $conexion->prepare($sql);
     $stmt->execute($parametros);
     $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
 
 } catch (PDOException $e) {
     die("Error al obtener productos: " . $e->getMessage());

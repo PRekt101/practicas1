@@ -77,9 +77,9 @@ try {
     $redsys->setTransactiontype('0');
     $redsys->setTerminal($terminal);
 
-    $redsys->setNotification("http://localhost/comercio/practicas1/php/notificacion.php");
-    $redsys->setUrlOk("http://localhost/comercio/practicas1/php/ok.php");
-    $redsys->setUrlKo("http://localhost/comercio/practicas1/php/ko.php");
+    $redsys->setNotification("http://localhost/practicas/practicas1/php/notificacion.php");
+    $redsys->setUrlOk("http://localhost/practicas/practicas1/php/ok.php");
+    $redsys->setUrlKo("http://localhost/practicas/practicas1/php/ko.php");
 
     $redsys->setVersion('HMAC_SHA256_V1');
     $redsys->setTradeName('Mi Tienda');

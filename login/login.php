@@ -24,6 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($resultado) {
         $_SESSION['usuario'] = $resultado['nombre'];
+        $_SESSION['idUsuario'] = $resultado['idUsuario']; 
+        $_SESSION['rol'] = $resultado['rol'];
         header("Location: ../index.php");
         exit();
     } else {

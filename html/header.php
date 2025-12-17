@@ -56,6 +56,17 @@ if (isset($_SESSION['carrito'])) {
         <?php endif; ?>
       </a>
 
+      <?php 
+      // Definimos la ruta correcta dependiendo de si estamos en inicio o no
+      $ruta_admin = $en_raiz ? 'html/panel_admin.php' : 'panel_admin.php'; 
+      ?>
+
+      <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin'): ?>
+          <a href="<?= $ruta_admin ?>" title="Panel de Administración" style="color: #FFD700; margin-right: 15px;">
+              <i class="fa fa-cogs"></i>
+          </a>
+      <?php endif; ?>
+
       <?php if (isset($_SESSION['usuario'])): ?>
         <span class="user-display">¡Hola, <strong><?= htmlspecialchars($_SESSION['usuario']) ?></strong>!</span>
         <a href="<?= $ruta_logout ?>" class="user-icon logged-in" title="Cerrar sesión">
