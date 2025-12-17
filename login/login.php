@@ -2,30 +2,49 @@
 session_start();
 require_once "../php/conexion.php";
 
-// Si ya está logueado, redirige a index.php
-if (isset($_SESSION['usuario'])) {
-    header("Location: ../index.php");
-    exit();
-}
-
-// Si se envía el formulario... (la lógica de login sigue igual)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario = $_POST['usuario'];
     $password = $_POST['password'];
 
-    // Consulta segura con PDO
-    $sql = "SELECT * FROM usuario WHERE nombre = :usuario AND contraseña = :password";
+    // 1. Verificamos usuario y contraseña
+    $sql = "SELECT idUsuario, nombre FROM usuario WHERE nombre = :usuario AND contraseña = :password";
     $stmt = $conexion->prepare($sql);
     $stmt->bindParam(':usuario', $usuario);
     $stmt->bindParam(':password', $password);
     $stmt->execute();
-
+    
     $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($resultado) {
-        $_SESSION['usuario'] = $resultado['nombre'];
-        header("Location: ../index.php");
-        exit();
+        // 2. Intentamos insertar en el histórico
+        try {
+            $idUser = $resultado['idUsuario'];
+            $fechaActual = date('Y-m-d');
+            $horaActual = date('H:i:s');
+            $ipActual = $_SERVER['REMOTE_ADDR'];
+
+            // OJO: Revisa si en tu tabla la columna es 'fecha' o 'fechu'
+            // En mi anterior respuesta puse 'fecha' porque suele ser lo común, 
+            // pero si tu error decía "Unknown column h.fechu", quizás deba ser 'fecha'.
+            $sql_hist = "INSERT INTO historicousuarios (idUsuario, fecha, hora, ip) 
+                         VALUES (:id, :f, :h, :ip)";
+            $stmt_hist = $conexion->prepare($sql_hist);
+            $stmt_hist->execute([
+                ':id' => $idUser,
+                ':f'  => $fechaActual,
+                ':h'  => $horaActual,
+                ':ip' => $ipActual
+            ]);
+
+            // Si llegamos aquí, el insert funcionó.
+            $_SESSION['usuario'] = $resultado['nombre'];
+            header("Location: ../index.php");
+            exit();
+
+        } catch (PDOException $e) {
+            // SI EL HISTORIAL FALLA, ESTO TE DIRÁ POR QUÉ:
+            die("Error al registrar en el histórico: " . $e->getMessage());
+        }
     } else {
         $error = "Usuario o contraseña incorrectos.";
     }
