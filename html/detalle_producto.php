@@ -47,9 +47,7 @@ if ($rutaImagen === '') {
 
 // 5. Lógica para AÑADIR AL CARRITO
 $mensaje = "";
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['talla'])) {
-    $talla = $_POST['talla'];
-    
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['talla']) && isset($_SESSION['usuario'])) {    $talla = $_POST['talla'];
     // Estructura básica del producto para el carrito
     $item = [
         'id' => $producto['idProducto'],
@@ -130,7 +128,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['talla'])) {
                 <p style="color: orange; font-size: 0.9em;">¡Date prisa! Solo quedan <?= $producto['stock'] ?> unidades.</p>
             <?php endif; ?>
 
-            <button type="submit">Añadir al carrito</button>
+            <?php if (isset($_SESSION['usuario'])): ?>
+                <button type="submit" style="width: 100%; background-color: #d40000; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold;">
+                    Añadir al carrito
+                </button>
+            <?php else: ?>
+                <button type="button" disabled style="width: 100%; background-color: #ccc; color: #666; padding: 12px; border: none; border-radius: 5px; cursor: not-allowed; font-size: 1rem; font-weight: bold;">
+                    Inicia sesión para comprar
+                </button>
+                <div style="text-align: center; margin-top: 10px;">
+                    <a href="../login/login.php" style="color: #d40000; text-decoration: underline;">Ir a Iniciar Sesión</a>
+                </div>
+            <?php endif; ?>
           </form>
 
       <?php else: ?>

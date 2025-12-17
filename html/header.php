@@ -13,7 +13,7 @@ $ruta_inicio  = $en_raiz ? 'index.php'            : '../index.php';
 $ruta_carrito = $en_raiz ? 'html/ver_carrito.php' : 'ver_carrito.php';
 $ruta_login   = $en_raiz ? 'login/login.php'      : '../login/login.php';
 $ruta_logout  = $en_raiz ? 'login/logout.php'     : '../login/logout.php';
-$ruta_info_usuario = $en_raiz ? 'html/info_usuario.php' : 'info_usuario.php';
+$ruta_historico  = $en_raiz ? 'login/admin_usuarios.php'     : '../login/admin_usuarios.php';
 
 
 // --- CONTADOR DE PRODUCTOS ---
@@ -30,12 +30,31 @@ if (isset($_SESSION['carrito'])) {
     <h1><a href="<?= $ruta_inicio ?>" style="text-decoration: none; color: inherit;">JP Calzados</a></h1>
     
     <form method="GET" action="<?= $ruta_inicio ?>" class="buscador">
-      <input type="text" name="buscar" placeholder="Buscar productos.." value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>">
+      <input type="text" 
+             name="busqueda" 
+             placeholder="Buscar productos.." 
+             value="<?= htmlspecialchars($_GET['busqueda'] ?? '') ?>">
       <button type="submit"><i class="fa fa-search"></i></button>
     </form>
     
     <div class="iconos">
       
+      <?php 
+        // Definimos la ruta correcta dependiendo de si estamos en inicio o no
+        $ruta_admin = $en_raiz ? 'html/panel_admin.php' : 'panel_admin.php'; 
+      ?>
+      <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin'): ?>
+          <a href="<?= $ruta_admin ?>" title="Panel de Administración" style="color: #ffffffff; margin-right: 15px;">
+              <i class="fa fa-cogs"></i>
+          </a>
+      <?php endif; ?>
+
+      <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin'): ?>
+          <a href="<?= $ruta_historico ?>" title="Ver Usuarios" style="color: #ffffffff; margin-right: 20px;">
+              <i class="fa fa-users"></i>
+          </a>
+      <?php endif; ?>
+
       <a href="<?= $ruta_carrito ?>" title="Ver carrito" style="position: relative;">
         <i class="fa fa-shopping-cart"></i>
         <?php if ($cantidad_items > 0): ?>
@@ -77,11 +96,4 @@ if (isset($_SESSION['carrito'])) {
     </div>
   </div>
 
-  <nav class="categorias">
-    <a href="#">Zapatillas</a>
-    <a href="#">Tacones</a>
-    <a href="#">Chanclas</a>
-    <a href="#">Botas</a>
-    <a href="#">Casuales</a>
-  </nav>
 </header>
