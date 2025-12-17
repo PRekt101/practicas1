@@ -14,6 +14,7 @@ $ruta_carrito = $en_raiz ? 'html/ver_carrito.php' : 'ver_carrito.php';
 $ruta_login   = $en_raiz ? 'login/login.php'      : '../login/login.php';
 $ruta_logout  = $en_raiz ? 'login/logout.php'     : '../login/logout.php';
 $ruta_historico  = $en_raiz ? 'login/admin_usuarios.php'     : '../login/admin_usuarios.php';
+$ruta_info = $en_raiz ? 'html/info_usuario.php' : 'info_usuario.php';
 
 
 // --- CONTADOR DE PRODUCTOS ---
@@ -55,6 +56,12 @@ if (isset($_SESSION['carrito'])) {
           </a>
       <?php endif; ?>
 
+      <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin'): ?>
+          <a href="<?= $ruta_info ?>" title="Ver Informes" style="color: #ffffffff; margin-right: 20px;">
+              <i class="fa fa-info"></i>
+          </a>
+      <?php endif; ?>
+
       <a href="<?= $ruta_carrito ?>" title="Ver carrito" style="position: relative;">
         <i class="fa fa-shopping-cart"></i>
         <?php if ($cantidad_items > 0): ?>
@@ -75,16 +82,7 @@ if (isset($_SESSION['carrito'])) {
       </a>
 
       <?php if (isset($_SESSION['usuario'])): ?>
-        <a href="<?= $ruta_info_usuario ?>" 
-          title="Información del usuario"
-          class="user-data-btn"
-          style="margin-right: 15px; text-decoration: none; font-size: 0.9rem;">
-          📄 Información del usuario
-        </a>
-
-        <span class="user-display">
-          ¡Hola, <strong><?= htmlspecialchars($_SESSION['usuario']) ?></strong>!
-        </span>
+        <span class="user-display">¡Hola, <strong><?= htmlspecialchars($_SESSION['usuario']) ?></strong>!</span>
         <a href="<?= $ruta_logout ?>" class="user-icon logged-in" title="Cerrar sesión">
           <i class="fa fa-user"></i>
         </a>

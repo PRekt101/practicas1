@@ -12,72 +12,84 @@ $estado  = 'error';
 $mensaje = 'Firma no válida';
 
 if ($redsys->check($key, $_GET)) {
+
     $params   = $redsys->getMerchantParameters($_GET['Ds_MerchantParameters']);
     $response = (int)$params['Ds_Response'];
-    $order    = ltrim($params['Ds_Order'], '0'); // idCarrito real
 
     if ($response <= 99) {
 
-    try {
-        $conexion->beginTransaction();
+        try {
+            $conexion->beginTransaction();
 
-        // 1️⃣ Marcar carrito como pagado
-        $stmt = $conexion->prepare("
-            UPDATE carrito
-            SET estado = 'pagado'
-            WHERE idCarrito = ?
-        ");
-        $stmt->execute([$order]);
+            // 1️⃣ Obtener el último carrito pendiente del usuario
+            $stmt = $conexion->prepare("
+                SELECT idCarrito
+                FROM carrito
+                WHERE idUsuario = ?
+                  AND estado = 'pendiente'
+                ORDER BY idCarrito DESC
+                LIMIT 1
+            ");
+            $stmt->execute([$_SESSION['idUsuario']]);
+            $idCarrito = $stmt->fetchColumn();
 
-        // 2️⃣ Obtener todos los productos comprados en este carrito
-        $stmt = $conexion->prepare("
-            SELECT idProducto, cantidad
-            FROM carritodetalle
-            WHERE idCarrito = ?
-        ");
-        $stmt->execute([$order]);
-        $detalles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // 3️⃣ Restar stock (una fila por cada línea del carrito)
-        $stmtStock = $conexion->prepare("
-            UPDATE producto
-            SET stock = stock - ?
-            WHERE idProducto = ?
-              AND stock >= ?
-        ");
-
-        foreach ($detalles as $d) {
-            $stmtStock->execute([
-                $d['cantidad'],
-                $d['idProducto'],
-                $d['cantidad']
-            ]);
-
-            // Si no se ha actualizado → stock insuficiente
-            if ($stmtStock->rowCount() === 0) {
-                throw new Exception("Stock insuficiente para el producto ID {$d['idProducto']}");
+            if (!$idCarrito) {
+                throw new Exception('No se encontró carrito pendiente');
             }
+
+            // 2️⃣ Marcar carrito como pagado
+            $stmt = $conexion->prepare("
+                UPDATE carrito
+                SET estado = 'pagado'
+                WHERE idCarrito = ?
+            ");
+            $stmt->execute([$idCarrito]);
+
+            // 3️⃣ Obtener productos del carrito
+            $stmt = $conexion->prepare("
+                SELECT idProducto, cantidad
+                FROM carritodetalle
+                WHERE idCarrito = ?
+            ");
+            $stmt->execute([$idCarrito]);
+            $detalles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // 4️⃣ Restar stock
+            $stmtStock = $conexion->prepare("
+                UPDATE producto
+                SET stock = stock - ?
+                WHERE idProducto = ?
+                  AND stock >= ?
+            ");
+
+            foreach ($detalles as $d) {
+                $stmtStock->execute([
+                    $d['cantidad'],
+                    $d['idProducto'],
+                    $d['cantidad']
+                ]);
+
+                if ($stmtStock->rowCount() === 0) {
+                    throw new Exception("Stock insuficiente");
+                }
+            }
+
+            $conexion->commit();
+
+            unset($_SESSION['carrito']);
+
+            $estado  = 'ok';
+            $mensaje = 'Pago realizado correctamente';
+
+        } catch (Exception $e) {
+            $conexion->rollBack();
+
+            $estado  = 'error';
+            $mensaje = 'Error al procesar el pedido';
         }
-
-        // 4️⃣ Confirmar todo
-        $conexion->commit();
-
-        // Limpiar sesión
-        unset($_SESSION['carrito']);
-
-        $estado  = 'ok';
-        $mensaje = 'Pago realizado correctamente';
-
-    } catch (Exception $e) {
-        $conexion->rollBack();
-
-        $estado  = 'error';
-        $mensaje = 'Error al procesar el pedido: ' . $e->getMessage();
     }
-
 }
 
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">

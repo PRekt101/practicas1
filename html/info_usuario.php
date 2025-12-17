@@ -7,14 +7,39 @@ require_once __DIR__ . '/../php/conexion.php';
   SEGURIDAD
  ─────────────────────────────────────
 */
-if (!isset($_SESSION['usuario'])) {
+if (!isset($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     header('Location: ../login/login.php');
     exit;
 }
 
 /*
  ─────────────────────────────────────
-  KPIs GLOBALES
+  CLIENTES DISPONIBLES
+ ─────────────────────────────────────
+*/
+$stmt = $conexion->prepare("
+    SELECT idUsuario, nombre, email
+    FROM usuario
+    WHERE rol = 'cliente'
+    ORDER BY nombre
+");
+$stmt->execute();
+$clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (empty($clientes)) {
+    die('No hay clientes registrados');
+}
+
+/*
+ ─────────────────────────────────────
+  CLIENTE SELECCIONADO
+ ─────────────────────────────────────
+*/
+$idCliente = $_GET['cliente'] ?? $clientes[0]['idUsuario'];
+
+/*
+ ─────────────────────────────────────
+  KPIs GLOBALES (OPCIONAL)
  ─────────────────────────────────────
 */
 $stmt = $conexion->query("
@@ -32,77 +57,118 @@ $totales = $stmt->fetch(PDO::FETCH_ASSOC);
 
 /*
  ─────────────────────────────────────
-  PEDIDOS POR MES (GRÁFICO)
+  ESTADÍSTICAS DEL CLIENTE
  ─────────────────────────────────────
 */
-$stmt = $conexion->query("
+$stmt = $conexion->prepare("
+    SELECT
+        COUNT(c.idCarrito) AS total_pedidos,
+        IFNULL(SUM(c.precioTotal), 0) AS total_gastado,
+        IFNULL(AVG(c.precioTotal), 0) AS ticket_medio,
+        MAX(c.fechaCreacion) AS ultima_compra
+    FROM carrito c
+    WHERE c.idUsuario = ?
+      AND c.estado = 'pagado'
+");
+$stmt->execute([$idCliente]);
+$statsCliente = $stmt->fetch(PDO::FETCH_ASSOC);
+
+/*
+ ─────────────────────────────────────
+  PEDIDOS POR MES (CLIENTE)
+ ─────────────────────────────────────
+*/
+$stmt = $conexion->prepare("
     SELECT 
         DATE_FORMAT(fechaCreacion, '%Y-%m') AS mes,
         COUNT(*) AS total
     FROM carrito
     WHERE estado = 'pagado'
+      AND idUsuario = ?
     GROUP BY mes
     ORDER BY mes
 ");
+$stmt->execute([$idCliente]);
 $pedidosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /*
  ─────────────────────────────────────
-  INFORME GLOBAL DE USUARIOS
+  DATOS DEL CLIENTE
  ─────────────────────────────────────
 */
 $stmt = $conexion->prepare("
-    SELECT 
-        u.nombre,
-        u.email,
-        COUNT(c.idCarrito) AS total_pedidos,
-        IFNULL(SUM(c.precioTotal), 0) AS total_gastado,
-        MAX(c.fechaCreacion) AS ultima_compra
-    FROM usuario u
-    LEFT JOIN carrito c
-        ON u.idUsuario = c.idUsuario
-        AND c.estado = 'pagado'
-    GROUP BY u.idUsuario
-    ORDER BY total_gastado DESC
+    SELECT nombre, email
+    FROM usuario
+    WHERE idUsuario = ?
 ");
-$stmt->execute();
-$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->execute([$idCliente]);
+$cliente = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Informe de usuarios</title>
+    <title>Informe de clientes</title>
     <link rel="stylesheet" href="../css/estilos.css">
+
+    <style>/* Estilo del botón volver */
+        .btn-volver {
+            background-color: #333;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        .btn-volver:hover {
+            background-color: #555;
+        }
+        .btn-volver i { margin-right: 5px; }
+        </style>
 </head>
 <body>
 
-<?php include 'header.php'; ?>
-
 <div class="info-box">
 
-    <h1>Informe de información de usuarios</h1>
+    <h1>Informe de clientes</h1>
+    <div style="margin: 15px 0;">
+    <a href="../index.php" class="btn-volver">← Volver al inicio</a>
+    </div>
 
-    <!-- DASHBOARD -->
+    <!-- SELECTOR DE CLIENTE -->
+    <form method="get" style="margin-bottom:20px">
+        <label><strong>Cliente:</strong></label>
+        <select name="cliente" onchange="this.form.submit()">
+            <?php foreach ($clientes as $c): ?>
+                <option value="<?= $c['idUsuario'] ?>"
+                    <?= ($c['idUsuario'] == $idCliente) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($c['nombre']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </form>
+
+    <!-- KPIs DEL CLIENTE -->
     <div class="dashboard">
 
         <div class="kpis">
             <div class="kpi">
-                <h3><?= $totales['usuarios'] ?></h3>
-                <span>Usuarios</span>
-            </div>
-            <div class="kpi">
-                <h3><?= $totales['pedidos'] ?></h3>
+                <h3><?= $statsCliente['total_pedidos'] ?></h3>
                 <span>Pedidos</span>
             </div>
             <div class="kpi">
-                <h3><?= number_format($totales['facturacion'], 2) ?> €</h3>
-                <span>Facturación</span>
+                <h3><?= number_format($statsCliente['total_gastado'], 2) ?> €</h3>
+                <span>Total gastado</span>
             </div>
             <div class="kpi">
-                <h3><?= number_format($totales['ticket_medio'], 2) ?> €</h3>
+                <h3><?= number_format($statsCliente['ticket_medio'], 2) ?> €</h3>
                 <span>Ticket medio</span>
+            </div>
+            <div class="kpi">
+                <h3><?= $statsCliente['ultima_compra'] ?? '—' ?></h3>
+                <span>Última compra</span>
             </div>
         </div>
 
@@ -113,34 +179,11 @@ $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     </div>
 
-    <!-- TABLA -->
-    <table>
-        <thead>
-            <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th>Pedidos</th>
-                <th>Total gastado (€)</th>
-                <th>Última compra</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($usuarios as $u): ?>
-                <tr>
-                    <td><?= htmlspecialchars($u['nombre']) ?></td>
-                    <td><?= htmlspecialchars($u['email']) ?></td>
-                    <td><?= $u['total_pedidos'] ?></td>
-                    <td><?= number_format($u['total_gastado'], 2) ?></td>
-                    <td><?= $u['ultima_compra'] ?? '—' ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
+    <!-- INFO DEL CLIENTE -->
     <p class="muted">
-        Este informe muestra datos agregados de los usuarios con fines estadísticos
-        y de mejora del servicio. No se recopila información innecesaria ni sensible,
-        cumpliendo principios de minimización y transparencia.
+        Cliente seleccionado:
+        <strong><?= htmlspecialchars($cliente['nombre']) ?></strong>
+        (<?= htmlspecialchars($cliente['email']) ?>)
     </p>
 
 </div>
@@ -154,7 +197,6 @@ new Chart(document.getElementById('chartPedidos'), {
     data: {
         labels: <?= json_encode(array_column($pedidosMes, 'mes')) ?>,
         datasets: [{
-            label: 'Pedidos',
             data: <?= json_encode(array_column($pedidosMes, 'total')) ?>,
             borderColor: '#d10000',
             backgroundColor: 'rgba(209,0,0,0.15)',

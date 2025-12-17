@@ -154,7 +154,7 @@ main {
   display: grid;
   /* Columnas flexibles: mínimo 240px, máximo lo que quepa */
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 30px;
+  gap: 50px;
 }
 
 /* Estilo de la Tarjeta Individual */
@@ -181,6 +181,7 @@ main {
 .producto:hover {
   transform: translateY(-5px); /* Se levanta un poco */
   box-shadow: 0 10px 20px rgba(0,0,0,0.15); /* Sombra más fuerte */
+  
 }
 
 /* Contenedor de la Imagen */
@@ -227,6 +228,12 @@ main {
   color: #e63946; /* Rojo moderno */
   margin-top: 15px;
   display: block;
+}
+
+.grid-productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px; /* ← AQUÍ */
 }
 
 /* --- FOOTER --- */
@@ -427,3 +434,18 @@ footer {
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,.08);
 }
+
+/* Estilo del botón volver */
+        .btn-volver {
+            background-color: #333;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        .btn-volver:hover {
+            background-color: #555;
+        }
+        .btn-volver i { margin-right: 5px; }
