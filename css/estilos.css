@@ -1,6 +1,8 @@
 /* --- ESTILOS GENERALES --- */
 body {
   margin: 0;
+  padding: 0;
+  display: block;
   /* Cambio a una fuente más moderna y limpia */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f6f6f6;
@@ -8,6 +10,14 @@ body {
 }
 
 /* --- HEADER --- */
+
+header {
+    width: 100vw;          /* ocupa toda la ventana */
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
 .topbar {
   background: #d40000;
   color: white;
@@ -366,4 +376,54 @@ footer {
     text-decoration: none;
     border-radius: 6px;
     font-weight: 600;
+}
+
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+.info-box {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+}
+.dashboard {
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.kpi {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,.08);
+}
+
+.kpi h3 {
+    font-size: 28px;
+    margin-bottom: 5px;
+    color: #d10000;
+}
+
+.kpi span {
+    color: #666;
+    font-size: 14px;
+}
+
+.chart-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.08);
 }

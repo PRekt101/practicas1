@@ -17,24 +17,66 @@ if ($redsys->check($key, $_GET)) {
     $order    = ltrim($params['Ds_Order'], '0'); // idCarrito real
 
     if ($response <= 99) {
-        // Marcar carrito como pagado
+
+    try {
+        $conexion->beginTransaction();
+
+        // 1️⃣ Marcar carrito como pagado
         $stmt = $conexion->prepare("
             UPDATE carrito
             SET estado = 'pagado'
             WHERE idCarrito = ?
         ");
-
         $stmt->execute([$order]);
+
+        // 2️⃣ Obtener todos los productos comprados en este carrito
+        $stmt = $conexion->prepare("
+            SELECT idProducto, cantidad
+            FROM carritodetalle
+            WHERE idCarrito = ?
+        ");
+        $stmt->execute([$order]);
+        $detalles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3️⃣ Restar stock (una fila por cada línea del carrito)
+        $stmtStock = $conexion->prepare("
+            UPDATE producto
+            SET stock = stock - ?
+            WHERE idProducto = ?
+              AND stock >= ?
+        ");
+
+        foreach ($detalles as $d) {
+            $stmtStock->execute([
+                $d['cantidad'],
+                $d['idProducto'],
+                $d['cantidad']
+            ]);
+
+            // Si no se ha actualizado → stock insuficiente
+            if ($stmtStock->rowCount() === 0) {
+                throw new Exception("Stock insuficiente para el producto ID {$d['idProducto']}");
+            }
+        }
+
+        // 4️⃣ Confirmar todo
+        $conexion->commit();
 
         // Limpiar sesión
         unset($_SESSION['carrito']);
 
         $estado  = 'ok';
         $mensaje = 'Pago realizado correctamente';
-    } else {
-        $estado  = 'ko';
-        $mensaje = 'El pago ha sido rechazado';
+
+    } catch (Exception $e) {
+        $conexion->rollBack();
+
+        $estado  = 'error';
+        $mensaje = 'Error al procesar el pedido: ' . $e->getMessage();
     }
+
+}
+
 }
 ?>
 <!DOCTYPE html>

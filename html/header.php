@@ -13,6 +13,8 @@ $ruta_inicio  = $en_raiz ? 'index.php'            : '../index.php';
 $ruta_carrito = $en_raiz ? 'html/ver_carrito.php' : 'ver_carrito.php';
 $ruta_login   = $en_raiz ? 'login/login.php'      : '../login/login.php';
 $ruta_logout  = $en_raiz ? 'login/logout.php'     : '../login/logout.php';
+$ruta_info_usuario = $en_raiz ? 'html/info_usuario.php' : 'info_usuario.php';
+
 
 // --- CONTADOR DE PRODUCTOS ---
 $cantidad_items = 0;
@@ -54,7 +56,16 @@ if (isset($_SESSION['carrito'])) {
       </a>
 
       <?php if (isset($_SESSION['usuario'])): ?>
-        <span class="user-display">¡Hola, <strong><?= htmlspecialchars($_SESSION['usuario']) ?></strong>!</span>
+        <a href="<?= $ruta_info_usuario ?>" 
+          title="Información del usuario"
+          class="user-data-btn"
+          style="margin-right: 15px; text-decoration: none; font-size: 0.9rem;">
+          📄 Información del usuario
+        </a>
+
+        <span class="user-display">
+          ¡Hola, <strong><?= htmlspecialchars($_SESSION['usuario']) ?></strong>!
+        </span>
         <a href="<?= $ruta_logout ?>" class="user-icon logged-in" title="Cerrar sesión">
           <i class="fa fa-user"></i>
         </a>
