@@ -5,9 +5,15 @@ require_once 'conexion.php';
 $filtros = [];
 $parametros = [];
 
+if (!empty($_GET['busqueda'])) {
+    // Usamos LIKE para buscar coincidencias parciales en el nombre
+    $filtros[] = "p.nombre LIKE :busqueda";
+    $parametros[':busqueda'] = "%" . $_GET['busqueda'] . "%";
+}
+
 // Comprobamos si hay filtros enviados por GET
 if (!empty($_GET['marca'])) {
-    $filtros[] = "p.marca_id = :marca";
+    $filtros[] = "p.idMarca = :marca";
     $parametros[':marca'] = $_GET['marca'];
 }
 
@@ -56,6 +62,9 @@ try {
     $stmt = $conexion->prepare($sql);
     $stmt->execute($parametros);
     $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
 } catch (PDOException $e) {
     die("Error al obtener productos: " . $e->getMessage());
 }

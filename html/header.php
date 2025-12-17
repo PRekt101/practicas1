@@ -28,7 +28,10 @@ if (isset($_SESSION['carrito'])) {
     <h1><a href="<?= $ruta_inicio ?>" style="text-decoration: none; color: inherit;">JP Calzados</a></h1>
     
     <form method="GET" action="<?= $ruta_inicio ?>" class="buscador">
-      <input type="text" name="buscar" placeholder="Buscar productos.." value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>">
+      <input type="text" 
+             name="busqueda" 
+             placeholder="Buscar productos.." 
+             value="<?= htmlspecialchars($_GET['busqueda'] ?? '') ?>">
       <button type="submit"><i class="fa fa-search"></i></button>
     </form>
     
@@ -66,11 +69,4 @@ if (isset($_SESSION['carrito'])) {
     </div>
   </div>
 
-  <nav class="categorias">
-    <a href="#">Zapatillas</a>
-    <a href="#">Tacones</a>
-    <a href="#">Chanclas</a>
-    <a href="#">Botas</a>
-    <a href="#">Casuales</a>
-  </nav>
 </header>
