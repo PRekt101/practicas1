@@ -107,7 +107,7 @@ if (isset($_SESSION['carrito'])) {
                     
                     <div class="total-carrito">
                         <h3>Total a Pagar: <span>€ <?= number_format($totalCarrito, 2) ?></span></h3>
-                        <a href="checkout.php" class="btn-pagar">Finalizar Compra</a>
+                        <a href="crear_pago_redsys.php" class="btn-pagar">Finalizar Compra</a>
                     </div>
                 </div>
 
