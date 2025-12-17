@@ -5,6 +5,7 @@ require_once 'php/obtener_productos.php';
 
 session_start(); // solo inicia sesión, no redirige ni destruye
 
+
 // Si no está logueado, simplemente no hace nada especial.
 // No redirigimos al login automáticamente para poder ver la página.
 ?>

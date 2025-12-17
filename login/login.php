@@ -7,7 +7,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // 1. Verificamos usuario y contraseña
-    $sql = "SELECT idUsuario, nombre FROM usuario WHERE nombre = :usuario AND contraseña = :password";
+    //$sql = "SELECT idUsuario, nombre FROM usuario WHERE nombre = :usuario AND contraseña = :password";
+    $sql = "SELECT * FROM usuario WHERE nombre = :usuario AND contraseña = :password";
     $stmt = $conexion->prepare($sql);
     $stmt->bindParam(':usuario', $usuario);
     $stmt->bindParam(':password', $password);
@@ -26,8 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // OJO: Revisa si en tu tabla la columna es 'fecha' o 'fechu'
             // En mi anterior respuesta puse 'fecha' porque suele ser lo común, 
             // pero si tu error decía "Unknown column h.fechu", quizás deba ser 'fecha'.
-            $sql_hist = "INSERT INTO historicousuarios (idUsuario, fecha, hora, ip) 
-                         VALUES (:id, :f, :h, :ip)";
+            $sql_hist = "INSERT INTO historicousuarios (idUsuario, fecha, hora, ip) VALUES (:id, :f, :h, :ip)";
             $stmt_hist = $conexion->prepare($sql_hist);
             $stmt_hist->execute([
                 ':id' => $idUser,

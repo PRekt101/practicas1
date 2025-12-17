@@ -64,7 +64,7 @@ $terminal     = '1';
  * Ds_Order: 4–12 caracteres numéricos
  * Usamos el idCarrito con padding
  */
-$order  = str_pad($idCarrito, 10, '0', STR_PAD_LEFT);
+$order  = str_pad($idCarrito, 4, '0', STR_PAD_LEFT);
 $amount = intval(round($total)); // CÉNTIMOS
 
 try {
