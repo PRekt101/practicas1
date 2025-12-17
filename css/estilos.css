@@ -1,7 +1,10 @@
+/* --- ESTILOS GENERALES --- */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  /* Cambio a una fuente más moderna y limpia */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f6f6f6;
+  color: #333;
 }
 
 /* --- HEADER --- */
@@ -28,99 +31,192 @@ body {
   padding: 8px;
   border: none;
   border-radius: 4px 0 0 4px;
+  outline: none;
 }
 .buscador button {
   background: white;
   border: none;
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-radius: 0 4px 4px 0;
   cursor: pointer;
+  color: #333;
 }
 .iconos i {
   margin-left: 15px;
   cursor: pointer;
+  font-size: 1.2rem;
 }
 
 .categorias {
   background: white;
   display: flex;
   justify-content: center;
-  padding: 10px;
-  gap: 25px;
+  padding: 15px;
+  gap: 30px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 .categorias a {
   text-decoration: none;
-  color: black;
-  font-weight: bold;
+  color: #333;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+.categorias a:hover {
+  color: #d40000;
 }
 
 /* --- LAYOUT --- */
 .contenedor {
   display: flex;
-  padding: 20px 40px;
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 40px;
 }
 
+/* --- FILTROS (SIDEBAR) --- */
 .filtros {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  width: 220px;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  width: 250px;
   height: fit-content;
+  flex-shrink: 0; /* Evita que se aplaste */
+}
+.filtros h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
 }
 .filtros label {
   display: block;
-  margin-top: 10px;
-  font-weight: bold;
+  margin-top: 15px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
 }
 .filtros select, .filtros input {
   width: 100%;
-  padding: 5px;
+  padding: 8px;
   margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
 }
 .filtros .botones {
-  margin-top: 15px;
+  margin-top: 25px;
   display: flex;
   justify-content: space-between;
+  gap: 10px;
 }
 .filtros button, .filtros .limpiar {
-  padding: 6px 10px;
+  padding: 10px;
   border: none;
   background: #d40000;
   color: white;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 0.9rem;
+  flex: 1;
+  text-align: center;
+  transition: background 0.3s;
+}
+.filtros button:hover {
+  background: #a00000;
 }
 .filtros .limpiar {
-  background: gray;
+  background: #6c757d;
+}
+.filtros .limpiar:hover {
+  background: #5a6268;
 }
 
-/* --- PRODUCTOS --- */
+/* --- PRODUCTOS (GRID Y TARJETAS MEJORADAS) --- */
 main {
   flex-grow: 1;
-  margin-left: 30px;
 }
+
 .productos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  /* Columnas flexibles: mínimo 240px, máximo lo que quepa */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 30px;
 }
+
+/* Estilo de la Tarjeta Individual */
 .producto {
-  background: #fff9e6;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-  text-align: left;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Sombra suave */
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  /* Quitamos estilos de enlace por defecto */
+  text-decoration: none;
+  color: inherit;
+  
+  /* Flexbox para alinear el contenido verticalmente */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
+
+/* Efecto Hover */
+.producto:hover {
+  transform: translateY(-5px); /* Se levanta un poco */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15); /* Sombra más fuerte */
+}
+
+/* Contenedor de la Imagen */
 .producto .imagen {
-  background: #f7e99a;
-  height: 120px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  width: 100%;
+  height: 180px; /* Altura fija para uniformidad */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  overflow: hidden;
 }
-.precio {
+
+/* La imagen en sí */
+.producto .imagen img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* CLAVE: La imagen no se deforma */
+}
+
+/* Título del producto */
+.producto h3 {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 10px 0 5px 0;
+  font-weight: 600;
+  /* Puntos suspensivos si es muy largo */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Marca y Color */
+.producto p {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 5px 0;
+}
+
+/* Precio */
+.producto .precio {
+  font-size: 1.3rem;
   font-weight: bold;
+  color: #e63946; /* Rojo moderno */
+  margin-top: 15px;
+  display: block;
 }
 
 /* --- FOOTER --- */
@@ -128,41 +224,44 @@ footer {
   background: #222;
   color: white;
   text-align: center;
-  padding: 15px;
-  margin-top: 30px;
+  padding: 20px;
+  margin-top: 60px;
+  font-size: 0.9rem;
 }
 
-/* Aseguramos que los enlaces de iconos hereden el color blanco del topbar */
+/* --- ICONOS DE USUARIO --- */
 .iconos a {
   color: inherit;
   text-decoration: none;
+  transition: opacity 0.3s;
+}
+.iconos a:hover {
+  opacity: 0.8;
 }
 
-/* Estilo para mostrar el nombre de usuario (solo visible cuando está logueado) */
 .iconos .user-display {
   color: white;
   font-size: 0.9em;
   font-weight: bold;
-  margin-right: 5px; /* Espacio antes del icono de usuario */
+  margin-right: 10px;
 }
 
-/* Estilo del icono de usuario cuando está logueado (Cerrar Sesión) */
 .iconos .user-icon.logged-in i {
-  /* Color verde claro para indicar estado activo */
   color: #a7f3d0;
-  /* Añadimos un pequeño fondo o borde para que destaque aún más */
-  background-color: rgba(0, 0, 0, 0.2); 
-  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.1); 
+  padding: 8px;
   border-radius: 50%;
 }
 
-/* --- Estilos del Carrito --- */
+/* --- ESTILOS DEL CARRITO --- */
 .tabla-carrito {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
     background: #fff;
     box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .tabla-carrito th, .tabla-carrito td {
@@ -176,6 +275,7 @@ footer {
     font-weight: bold;
     text-transform: uppercase;
     font-size: 0.85rem;
+    color: #555;
 }
 
 .btn-eliminar {
@@ -184,82 +284,86 @@ footer {
     font-size: 1.2rem;
     transition: color 0.3s;
 }
-
-.btn-eliminar:hover {
-    color: #a71d2a;
-}
+.btn-eliminar:hover { color: #a71d2a; }
 
 .resumen-carrito {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fdfdfd;
-    padding: 20px;
-    border: 1px solid #eee;
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
     flex-wrap: wrap;
+    gap: 20px;
 }
 
 .total-carrito h3 {
     font-size: 1.5rem;
     margin-bottom: 15px;
+    margin-top: 0;
 }
+.total-carrito h3 span { color: #d40000; }
 
 .btn-pagar {
     background-color: #28a745;
     color: white;
-    padding: 12px 25px;
+    padding: 12px 30px;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 6px;
     font-weight: bold;
+    transition: background 0.3s;
 }
+.btn-pagar:hover { background-color: #218838; }
 
 .btn-seguir {
     background-color: #333;
     color: white;
     padding: 10px 20px;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 6px;
     margin-right: 10px;
     font-size: 0.9rem;
 }
-
 .btn-vaciar {
     color: #dc3545;
     text-decoration: underline;
     margin-right: 20px;
     font-size: 0.9rem;
+    cursor: pointer;
 }
 
-/* --- Estilos del Mensaje de Compra --- */
-  .mensaje-compra {
-      text-align: center;
-      padding: 50px 20px;
-      max-width: 600px;
-      margin: 50px auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  }
-  .exito {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-  }
-  .error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-  }
-  .icono-mensaje {
-      font-size: 4rem;
-      margin-bottom: 20px;
-      display: block;
-  }
-  .btn-inicio {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #333;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-  }
+/* --- MENSAJES DE CHECKOUT --- */
+.mensaje-compra {
+    text-align: center;
+    padding: 40px;
+    max-width: 600px;
+    margin: 40px auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.exito {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.icono-mensaje {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: block;
+}
+.btn-inicio {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 25px;
+    background-color: #333;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+}
