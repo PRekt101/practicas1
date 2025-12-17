@@ -1,12 +1,33 @@
 <aside class="filtros">
   <h3>Filtros</h3>
   <form method="GET" action="index.php">
+
+    <label for="busqueda">Buscar por Nombre</label>
+    <input type="text" name="busqueda" id="busqueda" placeholder="Ej: Bota de piel" value="<?= htmlspecialchars($_GET['busqueda'] ?? '') ?>">
     <label for="talla">Tamaño</label>
     <select name="talla" id="talla">
       <option value="">Todos</option>
       <?php for ($i = 35; $i <= 45; $i++): ?>
         <option value="<?= $i ?>" <?= (isset($_GET['talla']) && $_GET['talla'] == $i) ? 'selected' : '' ?>><?= $i ?></option>
       <?php endfor; ?>
+    </select>
+
+    <label for="talla">Tamaño</label>
+    <select name="talla" id="talla">
+      <option value="">Todos</option>
+      <?php for ($i = 35; $i <= 45; $i++): ?>
+        <option value="<?= $i ?>" <?= (isset($_GET['talla']) && $_GET['talla'] == $i) ? 'selected' : '' ?>><?= $i ?></option>
+      <?php endfor; ?>
+    </select>
+
+    <label for="tipo">Tipo</label>
+    <select name="tipo" id="tipo">
+      <option value="">Todos</option>
+      <option value="Zapatillas" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'Zapatillas') ? 'selected' : '' ?>>Zapatillas</option>
+      <option value="Tacones" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'Tacones') ? 'selected' : '' ?>>Tacones</option>
+      <option value="Botas" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'Botas') ? 'selected' : '' ?>>Botas</option>
+      <option value="chanclas" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'chanclas') ? 'selected' : '' ?>>chanclas</option>
+
     </select>
 
     <label for="color">Color</label>
@@ -16,6 +37,7 @@
       <option value="Negro" <?= (isset($_GET['color']) && $_GET['color'] == 'Negro') ? 'selected' : '' ?>>Negro</option>
       <option value="Rojo" <?= (isset($_GET['color']) && $_GET['color'] == 'Rojo') ? 'selected' : '' ?>>Rojo</option>
       <option value="Azul" <?= (isset($_GET['color']) && $_GET['color'] == 'Azul') ? 'selected' : '' ?>>Azul</option>
+      <option value="Verde" <?= (isset($_GET['color']) && $_GET['color'] == 'Verde') ? 'selected' : '' ?>>Azul</option>
     </select>
 
     <label for="marca">Marca</label>
