@@ -15,6 +15,8 @@ $ruta_login   = $en_raiz ? 'login/login.php'      : '../login/login.php';
 $ruta_logout  = $en_raiz ? 'login/logout.php'     : '../login/logout.php';
 $ruta_historico  = $en_raiz ? 'login/admin_usuarios.php'     : '../login/admin_usuarios.php';
 $ruta_info = $en_raiz ? 'html/info_usuario.php' : 'info_usuario.php';
+$ruta_editar_perfil = $en_raiz ? 'html/editar_perfil.php' : 'editar_perfil.php';
+
 
 
 // --- CONTADOR DE PRODUCTOS ---
@@ -59,6 +61,12 @@ if (isset($_SESSION['carrito'])) {
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin'): ?>
           <a href="<?= $ruta_info ?>" title="Ver Informes" style="color: #ffffffff; margin-right: 20px;">
               <i class="fa fa-info"></i>
+          </a>
+      <?php endif; ?>
+
+      <?php if (isset($_SESSION['usuario'])): ?>
+          <a href="<?= $ruta_editar_perfil ?>" title="Editar perfil" style="color: #ffffffff; margin-right: 20px;">
+              <i class="fa fa-id-card"></i>
           </a>
       <?php endif; ?>
 
