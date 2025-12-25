@@ -6,7 +6,6 @@ require_once '../php/conexion.php';
 
 // 2. Validación básica del ID
 if (!isset($_GET['id'])) {
-    // Redirigir al index si no hay ID, es más elegante que un "die"
     header("Location: ../index.php");
     exit;
 }
@@ -27,13 +26,12 @@ if (!$producto) {
     exit;
 }
 
-// 4. Lógica de la imagen (adaptada a la ruta relativa ../)
+// 4. Lógica de la imagen
 $nombreArchivo = preg_replace('/[^A-Za-z0-9_\-]/', '_', $producto['nombre']);
 $extensiones = ['jpg', 'jpeg', 'png', 'webp'];
 $rutaImagen = '';
 
 foreach ($extensiones as $ext) {
-    // Nota: Como estamos en /html, salimos una carpeta (..) para ir a imagenes
     $ruta = "../imagenes/$nombreArchivo.$ext";
     if (file_exists($ruta)) {
         $rutaImagen = $ruta;
@@ -45,26 +43,39 @@ if ($rutaImagen === '') {
     $rutaImagen = "../imagenes/no-imagen.png";
 }
 
-// 5. Lógica para AÑADIR AL CARRITO
+// 5. Lógica para AÑADIR AL CARRITO (MODIFICADA PARA STACKEAR)
 $mensaje = "";
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['talla']) && isset($_SESSION['usuario'])) {    $talla = $_POST['talla'];
-    // Estructura básica del producto para el carrito
-    $item = [
-        'id' => $producto['idProducto'],
-        'nombre' => $producto['nombre'],
-        'precio' => $producto['precio'],
-        'imagen' => $rutaImagen,
-        'talla' => $talla,
-        'cantidad' => 1
-    ];
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['talla']) && isset($_SESSION['usuario'])) {
+    $talla = $_POST['talla'];
+    
     // Inicializar carrito si no existe
     if (!isset($_SESSION['carrito'])) {
         $_SESSION['carrito'] = [];
     }
 
-    // Aquí podrías agregar lógica para no duplicar productos, sino sumar cantidad
-    $_SESSION['carrito'][] = $item;
+    $encontrado = false;
+
+    // Buscamos si el producto con la misma ID y misma TALLA ya está en el carrito
+    foreach ($_SESSION['carrito'] as $indice => $item) {
+        if ($item['id'] == $producto['idProducto'] && $item['talla'] == $talla) {
+            // Si existe, aumentamos la cantidad
+            $_SESSION['carrito'][$indice]['cantidad'] += 1;
+            $encontrado = true;
+            break;
+        }
+    }
+
+    // Si no se encontró, lo añadimos como un nuevo registro
+    if (!$encontrado) {
+        $_SESSION['carrito'][] = [
+            'id' => $producto['idProducto'],
+            'nombre' => $producto['nombre'],
+            'precio' => $producto['precio'],
+            'imagen' => $rutaImagen,
+            'talla' => $talla,
+            'cantidad' => 1
+        ];
+    }
     
     $mensaje = "¡Producto añadido al carrito correctamente!";
 }

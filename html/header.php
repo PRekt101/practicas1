@@ -4,19 +4,18 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // --- LÓGICA DE RUTAS ---
-// Detectamos si estamos en la raíz (donde está index.php) o dentro de la carpeta html
-// Si existe la carpeta 'html' en el directorio actual, estamos en la raíz.
 $en_raiz = is_dir('html'); 
 
-// Ajustamos las rutas dependiendo de dónde estemos
 $ruta_inicio  = $en_raiz ? 'index.php'            : '../index.php';
 $ruta_carrito = $en_raiz ? 'html/ver_carrito.php' : 'ver_carrito.php';
 $ruta_login   = $en_raiz ? 'login/login.php'      : '../login/login.php';
 $ruta_logout  = $en_raiz ? 'login/logout.php'     : '../login/logout.php';
-$ruta_historico  = $en_raiz ? 'login/admin_usuarios.php'     : '../login/admin_usuarios.php';
+$ruta_historico = $en_raiz ? 'login/admin_usuarios.php'      : '../login/admin_usuarios.php';
 $ruta_info = $en_raiz ? 'html/info_usuario.php' : 'info_usuario.php';
 $ruta_editar_perfil = $en_raiz ? 'html/editar_perfil.php' : 'editar_perfil.php';
 
+// NUEVA RUTA PARA FACTURAS
+$ruta_facturas = $en_raiz ? 'html/ver_facturas.php' : 'ver_facturas.php';
 
 
 // --- CONTADOR DE PRODUCTOS ---
@@ -43,7 +42,6 @@ if (isset($_SESSION['carrito'])) {
     <div class="iconos">
       
       <?php 
-        // Definimos la ruta correcta dependiendo de si estamos en inicio o no
         $ruta_admin = $en_raiz ? 'html/panel_admin.php' : 'panel_admin.php'; 
       ?>
       <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin'): ?>
@@ -65,12 +63,18 @@ if (isset($_SESSION['carrito'])) {
       <?php endif; ?>
 
       <?php if (isset($_SESSION['usuario'])): ?>
+          <a href="<?= $ruta_facturas ?>" title="Mis Facturas" style="color: #ffffffff; margin-right: 20px;">
+              <i class="fa fa-file-invoice"></i>
+          </a>
+      <?php endif; ?>
+
+      <?php if (isset($_SESSION['usuario'])): ?>
           <a href="<?= $ruta_editar_perfil ?>" title="Editar perfil" style="color: #ffffffff; margin-right: 20px;">
               <i class="fa fa-id-card"></i>
           </a>
       <?php endif; ?>
 
-      <a href="<?= $ruta_carrito ?>" title="Ver carrito" style="position: relative;">
+      <a href="<?= $ruta_carrito ?>" title="Ver carrito" style="position: relative; margin-right: 10px;">
         <i class="fa fa-shopping-cart"></i>
         <?php if ($cantidad_items > 0): ?>
             <span style="
@@ -101,5 +105,4 @@ if (isset($_SESSION['carrito'])) {
       <?php endif; ?>
     </div>
   </div>
-
 </header>
