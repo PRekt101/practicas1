@@ -38,13 +38,12 @@
                 // Ruta de la imagen según el nombre del producto
                 $nombreArchivo = preg_replace('/[^A-Za-z0-9_\-]/', '_', $p['nombre']); // evita espacios y caracteres raros
                 $extensiones = ['jpg', 'jpeg', 'png', 'webp'];
-                $rutaImagen = '';
+                $rutaImagen = 'imagenes/no-imagen.png';
 
                 foreach ($extensiones as $ext) {
-                  $ruta = "imagenes/$nombreArchivo.$ext";
-                  if (file_exists($ruta)) {
-                    $rutaImagen = $ruta;
-                    break;
+                  if (file_exists("imagenes/$nombreArchivo.$ext")) {
+                    $rutaImagen = "imagenes/$nombreArchivo.$ext";
+                    break; 
                   }
                 }
 

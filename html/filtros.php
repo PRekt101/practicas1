@@ -1,3 +1,34 @@
+<?php
+// 1. Conexión y Consultas Dinámicas
+// Usamos require_once para asegurar que la conexión existe
+require_once __DIR__ . '/../php/conexion.php'; 
+
+try {
+    // A) Obtener Tallas disponibles (sin repetir y ordenadas)
+    $sqlTallas = "SELECT DISTINCT talla FROM producto ORDER BY talla ASC";
+    $tallas = $conexion->query($sqlTallas)->fetchAll(PDO::FETCH_COLUMN);
+
+    // B) Obtener Tipos disponibles
+    $sqlTipos = "SELECT DISTINCT tipo FROM producto ORDER BY tipo ASC";
+    $tipos = $conexion->query($sqlTipos)->fetchAll(PDO::FETCH_COLUMN);
+
+    // C) Obtener Colores disponibles
+    $sqlColores = "SELECT DISTINCT color FROM producto ORDER BY color ASC";
+    $colores = $conexion->query($sqlColores)->fetchAll(PDO::FETCH_COLUMN);
+
+    // D) Obtener Marcas (Ya lo tenías, pero lo movemos aquí para ordenar)
+    $sqlMarcas = "SELECT idMarca, nombre FROM marca ORDER BY nombre ASC";
+    $marcas = $conexion->query($sqlMarcas)->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    // Si falla la BDD, inicializamos arrays vacíos para que no rompa la página
+    $tallas = [];
+    $tipos = [];
+    $colores = [];
+    $marcas = [];
+}
+?>
+
 <aside class="filtros">
     <h3>Filtros</h3>
     <form method="GET" action="index.php">
@@ -9,50 +40,37 @@
         <label for="talla">Tamaño</label>
         <select name="talla" id="talla">
             <option value="">Todos</option>
-            <?php for ($i = 35; $i <= 45; $i++): ?>
-                <option value="<?= $i ?>" <?= (isset($_GET['talla']) && $_GET['talla'] == $i) ? 'selected' : '' ?>>
-                    <?= $i ?>
+            <?php foreach ($tallas as $t): ?>
+                <option value="<?= $t ?>" <?= (isset($_GET['talla']) && $_GET['talla'] == $t) ? 'selected' : '' ?>>
+                    <?= $t ?>
                 </option>
-            <?php endfor; ?>
+            <?php endforeach; ?>
         </select>
 
         <label for="tipo">Tipo</label>
         <select name="tipo" id="tipo">
             <option value="">Todos</option>
-            <option value="Zapatillas" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'Zapatillas') ? 'selected' : '' ?>>Zapatillas</option>
-            <option value="Botas" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'Botas') ? 'selected' : '' ?>>Botas</option>
-            <option value="Tacones" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'Tacones') ? 'selected' : '' ?>>Tacones</option>
-            <option value="chanclas" <?= (isset($_GET['tipo']) && $_GET['tipo'] == 'chanclas') ? 'selected' : '' ?>>chanclas</option>
+            <?php foreach ($tipos as $tp): ?>
+                <option value="<?= $tp ?>" <?= (isset($_GET['tipo']) && $_GET['tipo'] == $tp) ? 'selected' : '' ?>>
+                    <?= ucfirst($tp) ?>
+                </option>
+            <?php endforeach; ?>
         </select>
 
         <label for="color">Color</label>
         <select name="color" id="color">
             <option value="">Todos</option>
-            <option value="Amarillo" <?= (isset($_GET['color']) && $_GET['color'] == 'Amarillo') ? 'selected' : '' ?>>Amarillo</option>
-            <option value="Naranja" <?= (isset($_GET['color']) && $_GET['color'] == 'Naranja') ? 'selected' : '' ?>>Naranja</option>
-            <option value="Violeta" <?= (isset($_GET['color']) && $_GET['color'] == 'Violeta') ? 'selected' : '' ?>>Violeta</option>
-            <option value="Blanco" <?= (isset($_GET['color']) && $_GET['color'] == 'Blanco') ? 'selected' : '' ?>>Blanco</option>
-            <option value="Negro" <?= (isset($_GET['color']) && $_GET['color'] == 'Negro') ? 'selected' : '' ?>>Negro</option>
-            <option value="Rojo" <?= (isset($_GET['color']) && $_GET['color'] == 'Rojo') ? 'selected' : '' ?>>Rojo</option>
-            <option value="Azul" <?= (isset($_GET['color']) && $_GET['color'] == 'Azul') ? 'selected' : '' ?>>Azul</option>
-            <option value="Verdes" <?= (isset($_GET['color']) && $_GET['color'] == 'Verdes') ? 'selected' : '' ?>>Verde</option>
-            <option value="Marron" <?= (isset($_GET['color']) && $_GET['color'] == 'Marron') ? 'selected' : '' ?>>Marron</option>
+            <?php foreach ($colores as $c): ?>
+                <option value="<?= $c ?>" <?= (isset($_GET['color']) && $_GET['color'] == $c) ? 'selected' : '' ?>>
+                    <?= ucfirst($c) ?>
+                </option>
+            <?php endforeach; ?>
         </select>
 
         <label for="marca">Marca</label>
         <select name="marca" id="marca">
             <option value="">Todas</option>
-            <?php
-            // Incluimos la conexión solo si no está ya incluida
-            require_once 'php/conexion.php'; 
-            
-            // Consulta para obtener las marcas
-            $sqlMarcas = "SELECT idMarca, nombre FROM marca ORDER BY nombre ASC";
-            $stmtMarcas = $conexion->query($sqlMarcas);
-            $marcas = $stmtMarcas->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($marcas as $m):
-            ?>
+            <?php foreach ($marcas as $m): ?>
                 <option value="<?= $m['idMarca'] ?>" <?= (isset($_GET['marca']) && $_GET['marca'] == $m['idMarca']) ? 'selected' : '' ?>>
                     <?= $m['nombre'] ?>
                 </option>

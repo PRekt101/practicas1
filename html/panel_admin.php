@@ -138,13 +138,13 @@ $productos = $conexion->query($sqlProd)->fetchAll(PDO::FETCH_ASSOC);
                                value="<?= $prodEditar['precio'] ?? '' ?>" placeholder="50.00">
                     </div>
 
-                    <!-- <div class="form-group">
+                    <div class="form-group">
                         <label>Imagen <?= $prodEditar ? '(Opcional)' : '(Obligatoria)' ?>:</label>
                         <input type="file" name="imagen" accept="image/*" <?= $prodEditar ? '' : 'required' ?>>
                         <?php if($prodEditar): ?>
                             <small style="color:#666;">Deja vacío para mantener la imagen actual.</small>
                         <?php endif; ?>
-                    </div> -->
+                    </div>
 
                     <button type="submit" style="width:100%; background:<?= $prodEditar ? '#007bff' : '#28a745' ?>; color: white; padding: 10px; border:none; border-radius:5px; font-size:1rem; cursor:pointer;">
                         <?= $prodEditar ? 'Actualizar Producto' : 'Guardar Producto' ?>
