@@ -35,7 +35,8 @@ if (empty($clientes)) {
   CLIENTE SELECCIONADO
  ─────────────────────────────────────
 */
-$idCliente = $_GET['cliente'] ?? $clientes[0]['idUsuario'];
+$idCliente = $_GET['cliente'] ?? 'all';
+
 
 /*
  ─────────────────────────────────────
@@ -52,6 +53,7 @@ $stmt = $conexion->query("
     LEFT JOIN carrito c
         ON u.idUsuario = c.idUsuario
         AND c.estado = 'pagado'
+    WHERE u.rol = 'cliente'
 ");
 $totales = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -60,49 +62,133 @@ $totales = $stmt->fetch(PDO::FETCH_ASSOC);
   ESTADÍSTICAS DEL CLIENTE
  ─────────────────────────────────────
 */
-$stmt = $conexion->prepare("
-    SELECT
-        COUNT(c.idCarrito) AS total_pedidos,
-        IFNULL(SUM(c.precioTotal), 0) AS total_gastado,
-        IFNULL(AVG(c.precioTotal), 0) AS ticket_medio,
-        MAX(c.fechaCreacion) AS ultima_compra
-    FROM carrito c
-    WHERE c.idUsuario = ?
-      AND c.estado = 'pagado'
-");
-$stmt->execute([$idCliente]);
-$statsCliente = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($idCliente === 'all') {
+
+    $stmt = $conexion->query("
+        SELECT
+            COUNT(c.idCarrito) AS total_pedidos,
+            IFNULL(SUM(c.precioTotal), 0) AS total_gastado,
+            IFNULL(AVG(c.precioTotal), 0) AS ticket_medio,
+            MAX(c.fechaCreacion) AS ultima_compra
+        FROM carrito c
+        INNER JOIN usuario u ON u.idUsuario = c.idUsuario
+        WHERE c.estado = 'pagado'
+          AND u.rol = 'cliente'
+    ");
+
+    $statsCliente = $stmt->fetch(PDO::FETCH_ASSOC);
+} else {
+
+    // KPIs de un cliente concreto
+    $stmt = $conexion->prepare("
+        SELECT
+            COUNT(c.idCarrito) AS total_pedidos,
+            IFNULL(SUM(c.precioTotal), 0) AS total_gastado,
+            IFNULL(AVG(c.precioTotal), 0) AS ticket_medio,
+            MAX(c.fechaCreacion) AS ultima_compra
+        FROM carrito c
+        WHERE c.idUsuario = ?
+          AND c.estado = 'pagado'
+    ");
+    $stmt->execute([$idCliente]);
+    $statsCliente = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 
 /*
  ─────────────────────────────────────
   PEDIDOS POR MES (CLIENTE)
  ─────────────────────────────────────
 */
-$stmt = $conexion->prepare("
-    SELECT 
-        DATE_FORMAT(fechaCreacion, '%Y-%m') AS mes,
-        COUNT(*) AS total
-    FROM carrito
-    WHERE estado = 'pagado'
-      AND idUsuario = ?
-    GROUP BY mes
-    ORDER BY mes
-");
-$stmt->execute([$idCliente]);
-$pedidosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if ($idCliente === 'all') {
+
+    // MEDIA de pedidos por mes de todos los clientes
+    $stmt = $conexion->query("
+        SELECT mes, AVG(total) AS total
+        FROM (
+            SELECT 
+                DATE_FORMAT(c.fechaCreacion, '%Y-%m') AS mes,
+                c.idUsuario,
+                COUNT(*) AS total
+            FROM carrito c
+            INNER JOIN usuario u ON u.idUsuario = c.idUsuario
+            WHERE c.estado = 'pagado'
+              AND u.rol = 'cliente'
+            GROUP BY mes, c.idUsuario
+        ) t
+        GROUP BY mes
+        ORDER BY mes
+    ");
+
+    $pedidosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} else {
+
+    // Pedidos por mes de un cliente concreto
+    $stmt = $conexion->prepare("
+        SELECT 
+            DATE_FORMAT(fechaCreacion, '%Y-%m') AS mes,
+            COUNT(*) AS total
+        FROM carrito
+        WHERE estado = 'pagado'
+          AND idUsuario = ?
+        GROUP BY mes
+        ORDER BY mes
+    ");
+    $stmt->execute([$idCliente]);
+    $pedidosMes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
 
 /*
  ─────────────────────────────────────
   DATOS DEL CLIENTE
  ─────────────────────────────────────
 */
-$stmt = $conexion->prepare("
-    SELECT nombre, email
-    FROM usuario
-    WHERE idUsuario = ?
+if ($idCliente === 'all') {
+    $cliente = [
+        'nombre' => 'Todos los clientes',
+        'email'  => 'Media global'
+    ];
+} else {
+    $stmt = $conexion->prepare("
+        SELECT nombre, email
+        FROM usuario
+        WHERE idUsuario = ?
+    ");
+    $stmt->execute([$idCliente]);
+    $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+/*
+ ─────────────────────────────────────
+  CLIENTES ACTIVOS VS INACTIVOS (3 MESES)
+ ─────────────────────────────────────
+*/
+$stmt = $conexion->query("
+    SELECT
+        SUM(CASE 
+            WHEN ultima_compra >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+            THEN 1 ELSE 0 END) AS activos,
+        SUM(CASE 
+            WHEN ultima_compra < DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+                 OR ultima_compra IS NULL
+            THEN 1 ELSE 0 END) AS inactivos
+    FROM (
+        SELECT u.idUsuario, MAX(c.fechaCreacion) AS ultima_compra
+        FROM usuario u
+        LEFT JOIN carrito c 
+            ON c.idUsuario = u.idUsuario
+            AND c.estado = 'pagado'
+        WHERE u.rol = 'cliente'
+        GROUP BY u.idUsuario
+    ) t
 ");
-$stmt->execute([$idCliente]);
-$cliente = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$actividadClientes = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
 ?>
 
 <!DOCTYPE html>
@@ -141,6 +227,10 @@ $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
     <form method="get" style="margin-bottom:20px">
         <label><strong>Cliente:</strong></label>
         <select name="cliente" onchange="this.form.submit()">
+            <option value="all" <?= ($idCliente === 'all') ? 'selected' : '' ?>>
+                Todos los clientes (media)
+            </option>
+
             <?php foreach ($clientes as $c): ?>
                 <option value="<?= $c['idUsuario'] ?>"
                     <?= ($c['idUsuario'] == $idCliente) ? 'selected' : '' ?>>
@@ -177,6 +267,14 @@ $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
             <canvas id="chartPedidos"></canvas>
         </div>
 
+        <div class="chart-box">
+            <h2>Clientes activos vs inactivos (últimos 3 meses)</h2>
+            <canvas id="chartActividadClientes"></canvas>
+            <p class="muted">
+                Se considera activo un cliente que haya realizado al menos una compra
+                en los últimos 3 meses.
+            </p>
+        </div>
     </div>
 
     <!-- INFO DEL CLIENTE -->
@@ -210,6 +308,34 @@ new Chart(document.getElementById('chartPedidos'), {
     }
 });
 </script>
+
+<script>
+new Chart(document.getElementById('chartActividadClientes'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Clientes activos', 'Clientes inactivos'],
+        datasets: [{
+            data: [
+                <?= (int)$actividadClientes['activos'] ?>,
+                <?= (int)$actividadClientes['inactivos'] ?>
+            ],
+            backgroundColor: [
+                '#2ecc71', // verde
+                '#e74c3c'  // rojo
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+
 
 </body>
 </html>
