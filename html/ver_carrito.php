@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once '../php/conexion.php'; // Incluimos conexión por si queremos verificar stock más adelante
+require_once '../php/conexion.php'; 
 
-// --- LÓGICA PARA ELIMINAR O VACIAR ---
+// --- LÓGICA PARA ELIMINAR O VACIAR (Mantenemos tu lógica actual) ---
 
 // 1. Eliminar un producto específico
 if (isset($_GET['action']) && $_GET['action'] == 'eliminar' && isset($_GET['indice'])) {
@@ -49,6 +49,14 @@ if (isset($_SESSION['carrito'])) {
         <main class="carrito-container" style="margin-top: 40px; margin-bottom: 40px;">
             <h2>Tu Carrito de Compras</h2>
 
+            <?php if (isset($_SESSION['mensaje_error'])): ?>
+                <div style="background-color: #ffebee; color: #c62828; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ef9a9a; text-align: center;">
+                    <i class="fas fa-exclamation-circle"></i> <?= $_SESSION['mensaje_error']; ?>
+                </div>
+                <?php unset($_SESSION['mensaje_error']); // Borrar el mensaje tras mostrarlo ?>
+            <?php endif; ?>
+
+
             <?php if (empty($_SESSION['carrito'])): ?>
                 
                 <div class="carrito-vacio" style="text-align: center; padding: 50px;">
@@ -65,7 +73,9 @@ if (isset($_SESSION['carrito'])) {
                             <th>Producto</th>
                             <th>Talla</th>
                             <th>Precio</th>
-                            <th>Cantidad</th>
+                            
+                            <th style="text-align: center;">Cantidad</th>
+                            
                             <th>Subtotal</th>
                             <th>Acción</th>
                         </tr>
@@ -83,7 +93,29 @@ if (isset($_SESSION['carrito'])) {
                                 </td>
                                 <td><?= htmlspecialchars($item['talla']) ?></td>
                                 <td>€ <?= number_format($item['precio'], 2) ?></td>
-                                <td><?= $item['cantidad'] ?></td>
+                                
+                                <td class="celda-cantidad" style="text-align: center;">
+                                    
+                                    <form action="../php/actualizar_carrito.php" method="POST" style="display: flex; align-items: center; justify-content: center; gap: 5px; margin: 0;">
+                                        
+                                        <input type="hidden" name="id" value="<?= $item['id'] ?>">
+                                        
+                                        <button type="submit" name="accion" value="restar" 
+                                                style="background: #e0e0e0; color: #333; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-weight: bold;">
+                                            -
+                                        </button>
+
+                                        <span style="font-weight: bold; min-width: 25px; text-align: center;">
+                                            <?= $item['cantidad'] ?>
+                                        </span>
+
+                                        <button type="submit" name="accion" value="sumar" 
+                                                style="background: #d40000; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-weight: bold;">
+                                            +
+                                        </button>
+                                    </form>
+                                </td>
+
                                 <td style="font-weight: bold;">
                                     € <?= number_format($item['precio'] * $item['cantidad'], 2) ?>
                                 </td>
