@@ -21,9 +21,9 @@ if ($redsys->check($key, $_GET)) {
         try {
             $conexion->beginTransaction();
 
-            // 1️⃣ Obtener el último carrito pendiente del usuario
+            // 1️⃣ Obtener el último carrito pendiente del usuario (Y SU PRECIO TOTAL)
             $stmt = $conexion->prepare("
-                SELECT idCarrito
+                SELECT idCarrito, precioTotal 
                 FROM carrito
                 WHERE idUsuario = ?
                   AND estado = 'pendiente'
@@ -31,11 +31,14 @@ if ($redsys->check($key, $_GET)) {
                 LIMIT 1
             ");
             $stmt->execute([$_SESSION['idUsuario']]);
-            $idCarrito = $stmt->fetchColumn();
+            $datosCarrito = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$idCarrito) {
+            if (!$datosCarrito) {
                 throw new Exception('No se encontró carrito pendiente');
             }
+            
+            $idCarrito = $datosCarrito['idCarrito'];
+            $precioTotal = $datosCarrito['precioTotal'];
 
             // 2️⃣ Marcar carrito como pagado
             $stmt = $conexion->prepare("
@@ -73,6 +76,13 @@ if ($redsys->check($key, $_GET)) {
                     throw new Exception("Stock insuficiente");
                 }
             }
+
+            // 5️⃣ GENERAR FACTURA (NUEVO CÓDIGO)
+            $stmtFactura = $conexion->prepare("
+                INSERT INTO factura (idUsuario, idCarrito, fecha, total)
+                VALUES (?, ?, NOW(), ?)
+            ");
+            $stmtFactura->execute([$_SESSION['idUsuario'], $idCarrito, $precioTotal]);
 
             $conexion->commit();
 
@@ -138,18 +148,18 @@ a:hover { background: #0056b3; }
     <div class="icon ok">✔</div>
     <h1><?= $mensaje ?></h1>
     <p>Gracias por tu compra.</p>
-    <a href="/comercio/practicas1/index.php">Volver a la tienda</a>
+    <a href="/practicas1/index.php">Volver a la tienda</a>
 
 <?php elseif ($estado === 'ko'): ?>
     <div class="icon ko">✖</div>
     <h1><?= $mensaje ?></h1>
-    <a href="/comercio/practicas1/html/ver_carrito.php">Volver al carrito</a>
+    <a href="/practicas1/html/ver_carrito.php">Volver al carrito</a>
 
 <?php else: ?>
     <div class="icon ko">⚠</div>
     <h1>Error</h1>
     <p><?= $mensaje ?></p>
-    <a href="/comercio/practicas1/index.php">Volver a la tienda</a>
+    <a href="/practicas1/index.php">Volver a la tienda</a>
 <?php endif; ?>
 </div>
 

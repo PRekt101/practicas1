@@ -10,11 +10,11 @@ if (!isset($_SESSION['idUsuario'])) {
 $idUsuario = $_SESSION['idUsuario'];
 
 try {
-    // Usamos los nombres reales de tus columnas: idCarrito, precioTotal, fechaCreacion, estado
-    $sql = "SELECT idCarrito, precioTotal, fechaCreacion, estado 
-            FROM carrito 
+    // Ahora seleccionamos de la tabla FACTURA
+    $sql = "SELECT idFactura, idCarrito, fecha, total 
+            FROM factura 
             WHERE idUsuario = :idUser 
-            ORDER BY idCarrito DESC";
+            ORDER BY idFactura DESC";
     
     $stmt = $conexion->prepare($sql);
     $stmt->execute([':idUser' => $idUsuario]);
@@ -66,10 +66,14 @@ try {
                     <tbody>
                         <?php foreach ($facturas as $f): ?>
                             <tr>
-                                <td>#<?= $f['idCarrito'] ?></td>
-                                <td><?= date("d/m/Y", strtotime($f['fechaCreacion'])) ?></td>
-                                <td><strong>€ <?= number_format($f['precioTotal'], 2) ?></strong></td>
-                                <td><span class="estado-ok"><?= htmlspecialchars($f['estado']) ?></span></td>
+                                <td>#<?= $f['idFactura'] ?></td>
+                                
+                                <td><?= date("d/m/Y H:i", strtotime($f['fecha'])) ?></td>
+                                
+                                <td><strong>€ <?= number_format($f['total'], 2) ?></strong></td>
+                                
+                                <td><span class="estado-ok">Pagado</span></td>
+                                
                                 <td>
                                     <a href="detalle_factura.php?id=<?= $f['idCarrito'] ?>" class="btn-detalle">
                                         <i class="fa fa-eye"></i> Ver detalle
