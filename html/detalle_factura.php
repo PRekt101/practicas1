@@ -89,6 +89,9 @@ try {
             <a href="ver_facturas.php" style="display:inline-block; margin-top:20px; color:#666; text-decoration:none;">
                 <i class="fa fa-arrow-left"></i> Volver al listado
             </a>
+            <a href="generar_pdf.php?id=<?= $idCarrito ?>" target="_blank" class="btn-pdf">
+                <i class="fa fa-file-pdf"></i> Descargar Factura PDF
+            </a>
         </div>
     </div>
 
