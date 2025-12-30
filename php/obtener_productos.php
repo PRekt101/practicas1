@@ -51,7 +51,7 @@ $sql = "
         p.color,
         p.talla,
         p.precio,
-        p.stock, 
+        p.stock,  /* <--- AÑADE ESTA LÍNEA OBLIGATORIAMENTE */
         p.tipo,
         m.nombre AS marcaNombre
     FROM producto p
