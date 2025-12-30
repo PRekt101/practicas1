@@ -1,11 +1,13 @@
 <?php
+// php/obtener_productos.php
 require_once 'conexion.php';
 
 // Inicializamos array de filtros dinámicos
-$filtros = [];
+// IMPORTANTE: Añadimos la condición de stock > 0 por defecto
+$filtros = ["p.stock > 0"]; 
 $parametros = [];
 
-// 1. Filtros
+// 1. Filtros del Usuario
 if (!empty($_GET['busqueda'])) {
     $filtros[] = "p.nombre LIKE :busqueda";
     $parametros[':busqueda'] = "%" . $_GET['busqueda'] . "%";
@@ -49,12 +51,14 @@ $sql = "
         p.color,
         p.talla,
         p.precio,
+        p.stock, 
         p.tipo,
         m.nombre AS marcaNombre
     FROM producto p
     INNER JOIN marca m ON p.idMarca = m.idMarca
 ";
 
+// Aplicamos los filtros (incluido el de stock)
 if (!empty($filtros)) {
     $sql .= " WHERE " . implode(" AND ", $filtros);
 }
